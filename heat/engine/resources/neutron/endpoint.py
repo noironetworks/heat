@@ -43,8 +43,11 @@ class endpoint(resource.Resource):
         'endpoint_group_id': {
             'Type': 'String',
             'Required': True}
-      }
+    }
 
+    attributes_schema = {
+        'neutron_port_id': _("Neutron port id of this endpoint")
+    }
 
     def __init__(self, name, json_snippet, stack):
         super(endpoint, self).__init__(name, json_snippet, stack)
@@ -60,6 +63,11 @@ class endpoint(resource.Resource):
         ep = client.create_endpoint({'endpoint': props})['endpoint']
 
         self.resource_id_set(ep['id'])
+ 
+    def _resolve_attribute(self, name):
+        if name == 'neutron_port_id':
+            return self.neutron().show_endpoint(self.resource_id)['endpoint']['neutron_port_id']
+        return super(endpoint, self)._resolve_attribute(name)
 
     def handle_delete(self):
 
